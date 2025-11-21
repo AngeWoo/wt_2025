@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>歡修行扭蛋機</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+            padding: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 星星背景動畫 */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        /* 流星效果 */
+        .shooting-star {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: linear-gradient(45deg, transparent, white, transparent);
+            animation: shoot 3s linear infinite;
+        }
+
+        @keyframes shoot {
+            0% {
+                transform: translateX(-100px) translateY(-100px) rotate(45deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(500px) translateY(500px) rotate(45deg);
+                opacity: 0;
+            }
+        }
+
+        .gashapon-container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 30px;
+            padding: 40px;
+            backdrop-filter: blur(20px);
+            box-shadow: 
+                0 15px 35px rgba(0, 0, 0, 0.5),
+                inset 0 0 20px rgba(255, 255, 255, 0.1);
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+        }
+
+        .title {
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 
+                0 0 10px rgba(255, 255, 255, 0.5),
+                0 0 20px rgba(255, 255, 255, 0.3);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(255, 255, 255, 0.3); }
+            to { text-shadow: 0 0 20px rgba(255, 255, 255, 0.8), 0 0 30px rgba(255, 255, 255, 0.5); }
+        }
+
+        .instruction {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+
+        /* 新版扭蛋機設計 */
+        .gashapon-machine {
+            position: relative;
+            width: 320px;
+            height: 450px;
+            margin: 0 auto 20px;
+            perspective: 1000px;
+        }
+
+        .machine-body {
+            width: 100%;
+            height: 400px;
+            background: linear-gradient(145deg, #2c3e50, #34495e);
+            border-radius: 30px;
+            position: relative;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.5),
+                inset 0 2px 5px rgba(255, 255, 255, 0.2);
+            transform-style: preserve-3d;
+            transition: transform 0.3s ease;
+        }
+
+        .machine-body:hover {
+            transform: rotateY(5deg) rotateX(-5deg);
+        }
+
+        /* 玻璃球艙 */
+        .glass-sphere {
+            width: 220px;
+            height: 220px;
+            position: absolute;
+            top: 30px;
+            left: 50px;
+            border-radius: 50%;
+            background: 
+                radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3), transparent 50%),
+                radial-gradient(circle at 70% 70%, rgba(255, 255, 255, 0.1), transparent 50%),
+                linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            overflow: hidden;
+            box-shadow: 
+                inset 0 0 30px rgba(255, 255, 255, 0.1),
+                0 0 20px rgba(100, 200, 255, 0.3);
+            animation: sphere-glow 3s ease-in-out infinite;
+        }
+
+        @keyframes sphere-glow {
+            0%, 100% { box-shadow: inset 0 0 30px rgba(255, 255, 255, 0.1), 0 0 20px rgba(100, 200, 255, 0.3); }
+            50% { box-shadow: inset 0 0 40px rgba(255, 255, 255, 0.2), 0 0 30px rgba(100, 200, 255, 0.5); }
+        }
+
+        /* 漂浮的扭蛋 */
+        .floating-capsules {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            animation: rotate-capsules 20s linear infinite;
+        }
+
+        @keyframes rotate-capsules {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .floating-capsule {
+            position: absolute;
+            width: 40px;
+            height: 50px;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            animation: float-anim 3s ease-in-out infinite;
+            box-shadow: 
+                inset 0 -5px 10px rgba(0, 0, 0, 0.3),
+                0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes float-anim {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            33% { transform: translateY(-10px) rotate(120deg); }
+            66% { transform: translateY(5px) rotate(240deg); }
+        }
+
+        .floating-capsule:nth-child(1) { 
+            background: linear-gradient(145deg, #ff6b6b, #ff5252); 
+            top: 20%; left: 45%;
+            animation-delay: 0s;
+        }
+        .floating-capsule:nth-child(2) { 
+            background: linear-gradient(145deg, #4ecdc4, #44a39b); 
+            top: 35%; left: 25%;
+            animation-delay: 0.5s;
+        }
+        .floating-capsule:nth-child(3) { 
+            background: linear-gradient(145deg, #45b7d1, #3a9bb3); 
+            top: 35%; left: 65%;
+            animation-delay: 1s;
+        }
+        .floating-capsule:nth-child(4) { 
+            background: linear-gradient(145deg, #f9ca24, #f0b90b); 
+            top: 55%; left: 30%;
+            animation-delay: 1.5s;
+        }
+        .floating-capsule:nth-child(5) { 
+            background: linear-gradient(145deg, #a29bfe, #8b82fe); 
+            top: 55%; left: 60%;
+            animation-delay: 2s;
+        }
+        .floating-capsule:nth-child(6) { 
+            background: linear-gradient(145deg, #fd79a8, #fc5c95); 
+            top: 70%; left: 45%;
+            animation-delay: 2.5s;
+        }
+
+        /* 發光轉動把手 */
+        .cosmic-handle {
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            right: -50px;
+            top: 160px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .handle-outer {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: 
+                radial-gradient(circle at 30% 30%, #ffd700, #ffed4e);
+            box-shadow: 
+                0 0 30px rgba(255, 215, 0, 0.5),
+                inset 0 -3px 6px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                box-shadow: 0 0 30px rgba(255, 215, 0, 0.5), inset 0 -3px 6px rgba(0, 0, 0, 0.2);
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 0 50px rgba(255, 215, 0, 0.8), inset 0 -3px 6px rgba(0, 0, 0, 0.2);
+                transform: scale(1.05);
+            }
+        }
+
+        .handle-text {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            z-index: 2;
+        }
+
+        .cosmic-handle:hover .handle-outer {
+            transform: scale(1.1);
+        }
+
+        .cosmic-handle.spinning {
+            animation: super-spin 2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes super-spin {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(360deg) scale(1.2); }
+            100% { transform: rotate(720deg) scale(1); }
+        }
+
+        /* 震動效果 */
+        .machine-body.shaking {
+            animation: mega-shake 2s ease-in-out;
+        }
+
+        @keyframes mega-shake {
+            0%, 100% { transform: translateX(0) rotateZ(0deg); }
+            10% { transform: translateX(-5px) rotateZ(-1deg); }
+            20% { transform: translateX(5px) rotateZ(1deg); }
+            30% { transform: translateX(-5px) rotateZ(-1deg); }
+            40% { transform: translateX(5px) rotateZ(1deg); }
+            50% { transform: translateX(-3px) rotateZ(-0.5deg); }
+            60% { transform: translateX(3px) rotateZ(0.5deg); }
+            70% { transform: translateX(-2px) rotateZ(-0.3deg); }
+            80% { transform: translateX(2px) rotateZ(0.3deg); }
+            90% { transform: translateX(-1px) rotateZ(0deg); }
+        }
+
+        /* 扭蛋掉落動畫 */
+        .capsule-drop {
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 75px;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            opacity: 0;
+            animation: drop 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+        }
+
+        @keyframes drop {
+            0% {
+                transform: translateX(-50%) translateY(-300px) rotate(0deg);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+                transform: translateX(-50%) translateY(-150px) rotate(180deg);
+            }
+            70% {
+                transform: translateX(-50%) translateY(10px) rotate(270deg);
+            }
+            85% {
+                transform: translateX(-50%) translateY(-5px) rotate(340deg);
+            }
+            100% {
+                transform: translateX(-50%) translateY(0) rotate(360deg);
+                opacity: 1;
+            }
+        }
+
+        /* 出口槽 */
+        .exit-slot {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 60px;
+            background: linear-gradient(180deg, #1a1a1a, #2c2c2c);
+            border-radius: 10px 10px 20px 20px;
+            box-shadow: 
+                inset 0 5px 10px rgba(0, 0, 0, 0.5),
+                0 5px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 結果展示區 */
+        .result-area {
+            margin-top: 20px;
+            min-height: 150px;
+            position: relative;
+        }
+
+        .result-capsule {
+            width: 120px;
+            height: 150px;
+            margin: 0 auto;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            position: relative;
+            transform: scale(0);
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 
+                0 15px 35px rgba(0, 0, 0, 0.4),
+                inset 0 -5px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .result-capsule.show {
+            transform: scale(1);
+            animation: victory-spin 1s ease-out;
+        }
+
+        @keyframes victory-spin {
+            0% { transform: scale(0) rotate(0deg); }
+            50% { transform: scale(1.2) rotate(180deg); }
+            100% { transform: scale(1) rotate(360deg); }
+        }
+
+        .result-capsule.opening {
+            animation: capsule-open 1s ease-out forwards;
+        }
+
+        @keyframes capsule-open {
+            0% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(10deg); }
+            100% { transform: scale(1.2) rotate(0deg); }
+        }
+
+        .result-number {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 
+                0 0 20px currentColor,
+                0 0 40px currentColor;
+            opacity: 0;
+            animation: number-reveal 0.5s ease-out 0.5s forwards;
+        }
+
+        @keyframes number-reveal {
+            0% { 
+                opacity: 0; 
+                transform: translate(-50%, -50%) scale(0);
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.3);
+            }
+            100% { 
+                opacity: 1; 
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        /* 光環效果 */
+        .light-burst {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        .light-burst.active {
+            animation: burst 1s ease-out;
+        }
+
+        @keyframes burst {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0);
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(3);
+            }
+        }
+
+        .light-ray {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, white, transparent);
+            top: 50%;
+            left: 0;
+            transform-origin: center;
+        }
+
+        .light-ray:nth-child(1) { transform: rotate(0deg); }
+        .light-ray:nth-child(2) { transform: rotate(30deg); }
+        .light-ray:nth-child(3) { transform: rotate(60deg); }
+        .light-ray:nth-child(4) { transform: rotate(90deg); }
+        .light-ray:nth-child(5) { transform: rotate(120deg); }
+        .light-ray:nth-child(6) { transform: rotate(150deg); }
+
+        /* Modal 樣式 (從 index.html 複製並調整) */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            padding: 20px;
+        }
+
+        .modal.show {
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+            border-radius: 25px;
+            padding: clamp(25px, 6vw, 40px);
+            max-width: min(90vw, 500px);
+            width: 100%;
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.5),
+                inset 0 0 30px rgba(255, 255, 255, 0.2),
+                inset 0 0 0 3px #d4af37,
+                inset 0 0 0 6px rgba(255, 215, 0, 0.3);
+            transform: scale(0.8);
+            transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            position: relative;
+            overflow: visible;
+            border: 3px solid transparent;
+            background-clip: padding-box;
+        }
+
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            background: linear-gradient(135deg, 
+                #ffd700 0%, 
+                #ffed4e 15%, 
+                #d4af37 30%,
+                #ffd700 45%,
+                #ffed4e 60%,
+                #d4af37 75%,
+                #ffd700 90%,
+                #ffed4e 100%);
+            border-radius: 28px;
+            z-index: -1;
+            animation: shimmer 3s linear infinite;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.4);
+        }
+
+        @keyframes shimmer {
+            0% { filter: hue-rotate(0deg) brightness(1.2); }
+            50% { filter: hue-rotate(10deg) brightness(1.3); }
+            100% { filter: hue-rotate(0deg) brightness(1.2); }
+        }
+
+        .modal.show .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .modal-logo {
+            width: 90px;
+            height: 90px;
+            margin: -70px auto 10px;
+            display: block;
+            position: relative;
+            z-index: 100;
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5)) 
+                    drop-shadow(0 0 30px rgba(255, 255, 255, 0.8));
+            animation: logoFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .modal-logo::before {
+            content: '';
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.3));
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: -1;
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.6), 0 0 80px rgba(255, 223, 186, 0.4);
+        }
+
+        .modal-header h3 {
+            font-size: clamp(22px, 5vw, 32px);
+            color: var(--modal-color, #f39c12);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-message {
+            font-size: clamp(16px, 3.8vw, 20px);
+            line-height: 1.8;
+            color: #333;
+            text-align: center;
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 15px;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .modal-button {
+            background: var(--modal-color, #f39c12);
+            color: white;
+            border: none;
+            padding: clamp(14px, 3.5vw, 18px) clamp(35px, 8vw, 50px);
+            font-size: clamp(16px, 4vw, 20px);
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            width: 100%;
+            max-width: 300px;
+            display: block;
+            margin: 0 auto;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3), inset 0 -2px 5px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .modal-button:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), inset 0 -2px 5px rgba(0, 0, 0, 0.2); }
+        .modal-button:active { transform: translateY(0); box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3), inset 0 2px 5px rgba(0, 0, 0, 0.3); }
+
+        /* ============================================= */
+        /* == 手機版面適應 (Mobile Responsive Styles) == */
+        /* ============================================= */
+        @media (max-width: 540px) {
+            body {
+                overflow-x: hidden; 
+                padding: 10px;
+            }
+
+            .gashapon-container {
+                padding: 20px 15px; 
+            }
+
+            .title {
+                font-size: 28px; 
+            }
+
+            .instruction {
+                font-size: 14px;
+            }
+
+            .gashapon-machine {
+                transform: scale(0.85);
+                margin-top: -30px;
+                margin-bottom: -40px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <!-- 星星背景 -->
+    <div class="stars" id="stars"></div>
+
+    <div class="gashapon-container">
+        <h1 class="title">✨ 歡修行扭蛋機 ✨</h1>
+        <p class="instruction">今天請依據此名言來努力,邁出大乘利他的步伐!</p>
+        
+        <div class="gashapon-machine">
+            <div class="machine-body" id="machineBody">
+                <div class="glass-sphere">
+                    <div class="floating-capsules">
+                        <div class="floating-capsule"></div>
+                        <div class="floating-capsule"></div>
+                        <div class="floating-capsule"></div>
+                        <div class="floating-capsule"></div>
+                        <div class="floating-capsule"></div>
+                        <div class="floating-capsule"></div>
+                    </div>
+                </div>
+                
+                <div class="cosmic-handle" id="cosmicHandle">
+                    <div class="handle-outer">
+                        <span class="handle-text">請按我</span>
+                    </div>
+                </div>
+                
+                <div class="exit-slot"></div>
+                
+                <!-- 光環效果 -->
+                <div class="light-burst" id="lightBurst">
+                    <div class="light-ray"></div>
+                    <div class="light-ray"></div>
+                    <div class="light-ray"></div>
+                    <div class="light-ray"></div>
+                    <div class="light-ray"></div>
+                    <div class="light-ray"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="result-area">
+            <div class="result-capsule" id="resultCapsule">
+                <div class="result-number" id="resultNumber"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 統一 Modal -->
+    <div class="modal" id="mahayanaModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <img src="slogo.png" alt="Logo" class="modal-logo">
+                <h3>📿 大乘之道</h3>
+            </div>
+            <div class="modal-message" id="mahayanaMessage">正在載入智慧...</div>
+            <button class="modal-button" id="closeMahayanaBtn">南無真如</button>
+        </div>
+    </div>
+
+    <script>
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSmsbivmJSOlSU040kBg0FLr7MglWgV8GFGBpRBuCRah36LH__sp8fgfzHiASonM5d74ysM7qIY9EbL/pub?gid=0&single=true&output=csv';
+        
+        let mahayanaData = [];
+        let isSpinning = false;
+        let gashaponPool = [];
+
+        function refillGashaponPool() {
+            gashaponPool = [1, 2, 3, 4, 5, 6];
+        }
+        
+        async function loadSheetData() {
+            try {
+                const response = await fetch(CSV_URL);
+                if (!response.ok) throw new Error(`網路回應錯誤: ${response.status}`);
+                const csvText = await response.text();
+                const messages = csvText.split('\n').slice(1).map(line => line.trim().replace(/^"|"$/g, '')).filter(line => line);
+                if (messages.length === 0) throw new Error('CSV 檔案為空');
+                mahayanaData = messages;
+            } catch (error) {
+                console.error('❌ 資料載入失敗:', error);
+                mahayanaData = ["資料載入失敗！<br><small style='color: #e74c3c;'>請檢查網路連線，或確認 Google Sheet 已正確「發佈到網路」。</small>", "願一切眾生離苦得樂"];
+            }
+        }
+
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                starsContainer.appendChild(star);
+            }
+            
+            for (let i = 0; i < 3; i++) {
+                const shootingStar = document.createElement('div');
+                shootingStar.className = 'shooting-star';
+                shootingStar.style.left = Math.random() * 100 + '%';
+                shootingStar.style.top = Math.random() * 50 + '%';
+                shootingStar.style.animationDelay = Math.random() * 5 + 's';
+                starsContainer.appendChild(shootingStar);
+            }
+        }
+
+        function spinGashapon() {
+            if (isSpinning) return;
+            isSpinning = true;
+            
+            const handle = document.getElementById('cosmicHandle');
+            const machineBody = document.getElementById('machineBody');
+            const resultCapsule = document.getElementById('resultCapsule');
+            const lightBurst = document.getElementById('lightBurst');
+            
+            resultCapsule.classList.remove('show', 'opening');
+            
+            handle.classList.add('spinning');
+            machineBody.classList.add('shaking');
+            
+            setTimeout(() => {
+                if (gashaponPool.length === 0) refillGashaponPool();
+                const randomIndex = Math.floor(Math.random() * gashaponPool.length);
+                const randomNumber = gashaponPool.splice(randomIndex, 1)[0];
+                
+                let capsuleColor, bookTitle;
+                
+                switch(randomNumber) {
+                    case 1: bookTitle = '紫藤花第一集'; capsuleColor = '#8e44ad'; break;
+                    case 2: bookTitle = '紫藤花第二集'; capsuleColor = '#af7ac5'; break;
+                    case 3: bookTitle = '紫藤花第三集'; capsuleColor = '#fc5c95'; break;
+                    case 4: bookTitle = '這時候‧深呼吸'; capsuleColor = '#3498db'; break;
+                    case 5: bookTitle = '真如人生'; capsuleColor = '#f39c12'; break;
+                    case 6: bookTitle = '真乘物語'; capsuleColor = '#2ecc71'; break;
+                }
+                
+                const dropCapsule = document.createElement('div');
+                dropCapsule.className = 'capsule-drop';
+                dropCapsule.style.background = `linear-gradient(145deg, ${capsuleColor}, ${capsuleColor})`; // Simplified color
+                machineBody.appendChild(dropCapsule);
+                
+                setTimeout(() => {
+                    dropCapsule.remove();
+                    
+                    const resultNumber = document.getElementById('resultNumber');
+                    
+                    resultCapsule.style.background = capsuleColor;
+                    resultNumber.textContent = randomNumber;
+                    resultCapsule.classList.add('show');
+                    lightBurst.classList.add('active');
+                    
+                    setTimeout(() => {
+                        resultCapsule.classList.add('opening');
+                        setTimeout(() => {
+                            showModal(bookTitle, capsuleColor);
+                        }, 800);
+                    }, 1000);
+                    
+                    setTimeout(() => lightBurst.classList.remove('active'), 2000);
+                    
+                }, 1000);
+            }, 1500);
+            
+            setTimeout(() => {
+                handle.classList.remove('spinning');
+                machineBody.classList.remove('shaking');
+                isSpinning = false;
+            }, 2000);
+        }
+
+        function showModal(title, color) {
+            const modal = document.getElementById('mahayanaModal');
+            const resultCapsule = document.getElementById('resultCapsule');
+            
+            modal.querySelector('.modal-header h3').textContent = `📿 ${title}`;
+            const messageEl = document.getElementById('mahayanaMessage');
+            if (mahayanaData.length > 0) {
+                const filteredMessages = mahayanaData.filter(m => m.startsWith(`(${title})`));
+                if (filteredMessages.length > 0) {
+                    const randomMsg = filteredMessages[Math.floor(Math.random() * filteredMessages.length)];
+                    // 移除訊息前的書名標籤
+                    messageEl.innerHTML = randomMsg.replace(`(${title})`, '').trim();
+                } else {
+                    messageEl.innerHTML = `抱歉，目前資料庫中沒有找到關於「${title}」的語錄。`;
+                }
+            } else {
+                 messageEl.innerHTML = "發生未知錯誤，請重新整理頁面。";
+            }
+            modal.style.setProperty('--modal-color', color);
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('show');
+                resultCapsule.classList.remove('opening'); // 停止打開動畫
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('mahayanaModal');
+            const resultCapsule = document.getElementById('resultCapsule');
+            modal.classList.remove('show');
+            resultCapsule.classList.remove('show'); // 隱藏結果扭蛋
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            createStars();
+            loadSheetData();
+            refillGashaponPool();
+            
+            document.getElementById('cosmicHandle').addEventListener('click', spinGashapon);
+            document.getElementById('closeMahayanaBtn').addEventListener('click', closeModal);
+
+            const modal = document.getElementById('mahayanaModal');
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal();
+            });
+        });
+    </script>
+</body>
+</html>

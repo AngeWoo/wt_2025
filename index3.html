@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>歡修行扭蛋機</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #8b5fbf 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 動態粒子背景 */
+        .particles-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: float-particle 8s infinite linear;
+        }
+
+        @keyframes float-particle {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* 主容器 */
+        .main-container {
+            text-align: center;
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        /* 標題區域 */
+        .header {
+            margin-bottom: 40px;
+        }
+
+        .title {
+            font-size: clamp(28px, 6vw, 42px);
+            font-weight: 800;
+            color: white;
+            margin-bottom: 12px;
+            background: linear-gradient(45deg, #ffd700, #ffed4e, #fff);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        /* 智慧能量球主體 */
+        .wisdom-orb-container {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            margin: 0 auto 30px;
+        }
+
+        .wisdom-orb {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: 
+                radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.4), transparent 50%),
+                radial-gradient(circle at 70% 70%, rgba(255, 255, 255, 0.2), transparent 50%),
+                linear-gradient(135deg, #ff6b6b, #4ecdc4, #45b7d1, #f9ca24, #a29bfe);
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.3),
+                inset 0 0 40px rgba(255, 255, 255, 0.2);
+            animation: orb-breathe 4s ease-in-out infinite;
+        }
+
+        @keyframes orb-breathe {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 
+                    0 20px 60px rgba(0, 0, 0, 0.3),
+                    inset 0 0 40px rgba(255, 255, 255, 0.2),
+                    0 0 0 0 rgba(255, 255, 255, 0.4);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 
+                    0 25px 80px rgba(0, 0, 0, 0.4),
+                    inset 0 0 60px rgba(255, 255, 255, 0.3),
+                    0 0 0 20px rgba(255, 255, 255, 0.1);
+            }
+        }
+
+        .wisdom-orb:hover {
+            transform: scale(1.1);
+            animation-play-state: paused;
+        }
+
+        .wisdom-orb.activating {
+            animation: orb-activate 3s ease-out;
+        }
+
+        @keyframes orb-activate {
+            0% {
+                transform: scale(1);
+            }
+            25% {
+                transform: scale(1.2) rotate(90deg);
+            }
+            50% {
+                transform: scale(0.9) rotate(180deg);
+            }
+            75% {
+                transform: scale(1.3) rotate(270deg);
+            }
+            100% {
+                transform: scale(1) rotate(360deg);
+            }
+        }
+
+        /* 能量核心 */
+        .energy-core {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.3));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 環繞的能量環 */
+        .energy-rings {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+        }
+
+        .energy-ring {
+            position: absolute;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: rotate-ring 10s linear infinite;
+        }
+
+        .energy-ring:nth-child(1) {
+            width: 280px;
+            height: 280px;
+            top: 10px;
+            left: 10px;
+            animation-duration: 15s;
+        }
+
+        .energy-ring:nth-child(2) {
+            width: 240px;
+            height: 240px;
+            top: 30px;
+            left: 30px;
+            animation-duration: 12s;
+            animation-direction: reverse;
+        }
+
+        .energy-ring:nth-child(3) {
+            width: 200px;
+            height: 200px;
+            top: 50px;
+            left: 50px;
+            animation-duration: 18s;
+        }
+
+        @keyframes rotate-ring {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* 智慧指引顯示區 */
+        .wisdom-display {
+            min-height: 200px;
+            position: relative;
+            margin: 30px 0 20px 0;
+            width: 100%;
+        }
+
+        .wisdom-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transform: scale(0);
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            position: relative;
+            overflow: hidden;
+            --card-color: #ffd700; /* 動態顏色 */
+        }
+
+        .wisdom-card.show {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .wisdom-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: card-shine 2s ease-out;
+        }
+
+        .wisdom-header {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--card-color);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .wisdom-content {
+            font-size: 18px;
+            line-height: 1.7;
+            color: white;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 4px solid var(--card-color);
+            text-align: left;
+        }
+
+        /* 控制按鈕 */
+        .controls {
+            margin-top: 30px;
+        }
+
+        .control-btn {
+            background: var(--card-color, #764ba2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 10px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .control-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            filter: brightness(1.1);
+        }
+
+        .control-btn:active {
+            transform: translateY(0);
+        }
+
+        .control-btn.hidden {
+            opacity: 0;
+            transform: translateY(30px);
+            pointer-events: none;
+        }
+
+        .control-btn.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 能量爆發效果 */
+        .energy-burst {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            height: 400px;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        .energy-burst.active {
+            animation: energy-explosion 1.5s ease-out;
+        }
+
+        @keyframes energy-explosion {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0);
+            }
+            30% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(2);
+            }
+        }
+
+        .energy-beam {
+            position: absolute;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #ffd700, transparent);
+            top: 50%;
+            left: 0;
+            transform-origin: center;
+        }
+
+        .energy-beam:nth-child(1) { transform: rotate(0deg); }
+        .energy-beam:nth-child(2) { transform: rotate(30deg); }
+        .energy-beam:nth-child(3) { transform: rotate(60deg); }
+        .energy-beam:nth-child(4) { transform: rotate(90deg); }
+        .energy-beam:nth-child(5) { transform: rotate(120deg); }
+        .energy-beam:nth-child(6) { transform: rotate(150deg); }
+
+
+        /* 響應式設計 */
+        @media (max-width: 600px) {
+            body {
+                padding: 20px 15px 80px 15px;
+                justify-content: center; /* 保持居中 */
+                overflow-y: auto;
+                min-height: 100vh;
+            }
+
+            .main-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                min-height: calc(100vh - 100px);
+            }
+
+            .header {
+                margin-bottom: 30px;
+                flex-shrink: 0;
+            }
+
+            .title {
+                font-size: 36px; /* 標題字體加大 */
+                margin-bottom: 10px;
+            }
+
+            .subtitle {
+                font-size: 16px;
+            }
+
+            .wisdom-orb-container {
+                width: 300px; /* 圈圈加大 */
+                height: 300px;
+                margin-bottom: 0; /* 移除底部間距，讓後面元素更靠近 */
+                flex-shrink: 0;
+            }
+
+            .energy-core {
+                width: 110px; /* 核心也相應加大 */
+                height: 110px;
+                font-size: 16px;
+            }
+
+            .wisdom-display {
+                min-height: 180px;
+                margin: 40px 0 30px 0;
+                flex-grow: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+            }
+
+            .wisdom-card {
+                padding: 20px 15px;
+                margin-top: 20px;
+            }
+
+            .wisdom-header {
+                font-size: 18px;
+                margin-bottom: 15px;
+            }
+
+            .wisdom-content {
+                font-size: 15px;
+                padding: 18px;
+                line-height: 1.6;
+            }
+
+            .controls {
+                margin-top: 20px;
+                flex-shrink: 0;
+                margin-bottom: 20px;
+            }
+
+            .control-btn {
+                padding: 12px 30px; /* 按鈕變小 */
+                font-size: 14px;   /* 字體變小 */
+                margin: 5px;
+            }
+
+            /* 能量環相應調整 */
+            .energy-ring:nth-child(1) {
+                width: 320px;
+                height: 320px;
+                top: -10px;
+                left: -10px;
+            }
+
+            .energy-ring:nth-child(2) {
+                width: 280px;
+                height: 280px;
+                top: 10px;
+                left: 10px;
+            }
+
+            .energy-ring:nth-child(3) {
+                width: 240px;
+                height: 240px;
+                top: 30px;
+                left: 30px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .title {
+                font-size: 32px; /* 超小螢幕稍微縮小一點 */
+            }
+
+            .wisdom-orb-container {
+                width: 280px;
+                height: 280px;
+            }
+
+            .energy-core {
+                width: 100px;
+                height: 100px;
+                font-size: 15px;
+            }
+
+            .control-btn {
+                padding: 10px 25px;
+                font-size: 13px;
+            }
+
+            /* 能量環調整 */
+            .energy-ring:nth-child(1) {
+                width: 300px;
+                height: 300px;
+                top: -10px;
+                left: -10px;
+            }
+
+            .energy-ring:nth-child(2) {
+                width: 260px;
+                height: 260px;
+                top: 10px;
+                left: 10px;
+            }
+
+            .energy-ring:nth-child(3) {
+                width: 220px;
+                height: 220px;
+                top: 30px;
+                left: 30px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <!-- 動態粒子背景 -->
+    <div class="particles-container" id="particlesContainer"></div>
+
+    <div class="main-container">
+        <!-- 標題區域 -->
+        <div class="header">
+            <h1 class="title">✨ 歡修行扭蛋機 ✨</h1>
+            <p class="subtitle">今天請依據此名言來努力,邁出大乘利他的步伐!</p>
+        </div>
+
+        <!-- 智慧能量球 -->
+        <div class="wisdom-orb-container">
+            <div class="wisdom-orb" id="wisdomOrb">
+                <div class="energy-rings">
+                    <div class="energy-ring"></div>
+                    <div class="energy-ring"></div>
+                    <div class="energy-ring"></div>
+                </div>
+                <div class="energy-core">
+                    <span>請按我</span>
+                </div>
+                <div class="energy-burst" id="energyBurst">
+                    <div class="energy-beam"></div>
+                    <div class="energy-beam"></div>
+                    <div class="energy-beam"></div>
+                    <div class="energy-beam"></div>
+                    <div class="energy-beam"></div>
+                    <div class="energy-beam"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 智慧指引顯示區 -->
+        <div class="wisdom-display" id="wisdomDisplay">
+            <div class="wisdom-card" id="wisdomCard">
+                <div class="wisdom-header" id="wisdomHeader">📿 大乘之道</div>
+                <div class="wisdom-content" id="wisdomContent"></div>
+            </div>
+        </div>
+
+        <!-- 控制按鈕 -->
+        <div class="controls">
+            <button class="control-btn hidden" id="closeBtn">南無真如</button>
+        </div>
+    </div>
+
+    <script>
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSmsbivmJSOlSU040kBg0FLr7MglWgV8GFGBpRBuCRah36LH__sp8fgfzHiASonM5d74ysM7qIY9EbL/pub?gid=0&single=true&output=csv';
+        
+        let mahayanaData = [];
+        let isActivating = false;
+        let gashaponPool = [];
+
+        function refillGashaponPool() {
+            gashaponPool = [1, 2, 3, 4, 5, 6];
+        }
+        
+        async function loadSheetData() {
+            try {
+                const response = await fetch(CSV_URL);
+                if (!response.ok) throw new Error(`網路回應錯誤: ${response.status}`);
+                const csvText = await response.text();
+                const messages = csvText.split('\n').slice(1).map(line => line.trim().replace(/^"|"$/g, '')).filter(line => line);
+                if (messages.length === 0) throw new Error('CSV 檔案為空');
+                mahayanaData = messages;
+            } catch (error) {
+                console.error('❌ 資料載入失敗:', error);
+                mahayanaData = ["資料載入失敗！<br><small style='color: #e74c3c;'>請檢查網路連線，或確認 Google Sheet 已正確「發佈到網路」。</small>", "願一切眾生離苦得樂"];
+            }
+        }
+
+        // 創建動態粒子背景
+        function createParticles() {
+            const container = document.getElementById('particlesContainer');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 6) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        // 啟動智慧能量球
+        function activateWisdomOrb() {
+            if (isActivating) return;
+            
+            isActivating = true;
+            
+            const orb = document.getElementById('wisdomOrb');
+            const energyBurst = document.getElementById('energyBurst');
+            const wisdomCard = document.getElementById('wisdomCard');
+            const wisdomHeader = document.getElementById('wisdomHeader');
+            const wisdomContent = document.getElementById('wisdomContent');
+            const closeBtn = document.getElementById('closeBtn');
+            
+            wisdomCard.classList.remove('show');
+            closeBtn.classList.add('hidden');
+            closeBtn.classList.remove('visible');
+            
+            orb.classList.add('activating');
+            
+            setTimeout(() => {
+                energyBurst.classList.add('active');
+                
+                if (gashaponPool.length === 0) refillGashaponPool();
+                const randomIndex = Math.floor(Math.random() * gashaponPool.length);
+                const randomNumber = gashaponPool.splice(randomIndex, 1)[0];
+                
+                let cardColor, bookTitle;
+                
+                switch(randomNumber) {
+                    case 1: bookTitle = '紫藤花第一集'; cardColor = '#8e44ad'; break;
+                    case 2: bookTitle = '紫藤花第二集'; cardColor = '#af7ac5'; break;
+                    case 3: bookTitle = '紫藤花第三集'; cardColor = '#fc5c95'; break;
+                    case 4: bookTitle = '這時候‧深呼吸'; cardColor = '#3498db'; break;
+                    case 5: bookTitle = '真如人生'; cardColor = '#f39c12'; break;
+                    case 6: bookTitle = '真乘物語'; cardColor = '#2ecc71'; break;
+                }
+
+                setTimeout(() => {
+                    wisdomCard.style.setProperty('--card-color', cardColor);
+                    closeBtn.style.setProperty('background', cardColor);
+                    wisdomHeader.innerHTML = `📿 ${bookTitle}`;
+
+                    if (mahayanaData.length > 0) {
+                        const filteredMessages = mahayanaData.filter(m => m.startsWith(`(${bookTitle})`));
+                        if (filteredMessages.length > 0) {
+                            const randomMsg = filteredMessages[Math.floor(Math.random() * filteredMessages.length)];
+                            wisdomContent.innerHTML = randomMsg.replace(`(${bookTitle})`, '').trim();
+                        } else {
+                            wisdomContent.innerHTML = `抱歉，目前資料庫中沒有找到關於「${bookTitle}」的語錄。`;
+                        }
+                    } else {
+                        wisdomContent.innerHTML = "發生未知錯誤，請重新整理頁面。";
+                    }
+                    
+                    wisdomCard.classList.add('show');
+                    
+                    setTimeout(() => {
+                        closeBtn.classList.remove('hidden');
+                        closeBtn.classList.add('visible');
+                    }, 500);
+                    
+                }, 1000);
+                
+                setTimeout(() => {
+                    energyBurst.classList.remove('active');
+                }, 1500);
+                
+            }, 2000);
+            
+            setTimeout(() => {
+                orb.classList.remove('activating');
+                isActivating = false;
+            }, 3000);
+        }
+
+        // 關閉智慧指引卡
+        function closeWisdomCard() {
+            const wisdomCard = document.getElementById('wisdomCard');
+            const closeBtn = document.getElementById('closeBtn');
+            const wisdomContent = document.getElementById('wisdomContent');
+            
+            wisdomCard.classList.remove('show');
+            closeBtn.classList.add('hidden');
+            closeBtn.classList.remove('visible');
+            
+            setTimeout(() => {
+                wisdomContent.innerHTML = '';
+            }, 300);
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            loadSheetData();
+            refillGashaponPool();
+            
+            const wisdomOrb = document.getElementById('wisdomOrb');
+            const closeBtn = document.getElementById('closeBtn');
+            
+            wisdomOrb.addEventListener('click', activateWisdomOrb);
+            closeBtn.addEventListener('click', closeWisdomCard);
+        });
+    </script>
+</body>
+</html>

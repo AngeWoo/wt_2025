@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>歡修行扭蛋機</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(to bottom, #1e3c72 0%, #2a5298 50%, #7e8ba3 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+            padding: 10px;
+            overflow-x: hidden;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* 背景星星動畫 */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            animation: snowfall linear infinite;
+            opacity: 0.8;
+        }
+
+        @keyframes snowfall {
+            0% { transform: translateY(-10px); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(100vh); opacity: 0; }
+        }
+        
+        .gashapon-container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 30px;
+            padding: 25px;
+            backdrop-filter: blur(20px);
+            box-shadow: 
+                0 15px 35px rgba(0, 0, 0, 0.5),
+                inset 0 0 20px rgba(255, 255, 255, 0.1);
+            max-width: min(98vw, 480px);
+            width: 100%;
+            position: relative;
+            z-index: 10;
+        }
+
+        .title {
+            color: white;
+            font-size: clamp(26px, 6vw, 40px);
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-shadow: 
+                0 0 10px rgba(255, 255, 255, 0.5),
+                0 0 20px rgba(255, 255, 255, 0.3);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
+            to { text-shadow: 0 0 20px rgba(255, 255, 255, 0.8); }
+        }
+
+        .instruction {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: clamp(14px, 3.5vw, 18px);
+            margin-bottom: 25px;
+        }
+
+        .gashapon-machine {
+            position: relative;
+            width: min(88vw, 380px);
+            height: min(125vw, 520px);
+            margin: 20px auto 5px;
+            background: #fdfdfd;
+            border-radius: 25px;
+            border: 10px solid #5dadec;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .machine-body {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .machine-body.shaking {
+            animation: shake 0.3s ease-in-out infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(-3px, 0); }
+            75% { transform: translate(3px, 0); }
+        }
+
+        .capsule-area {
+            width: 100%;
+            height: 45%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: #f0f8ff;
+            border-top: 10px solid #f0f8ff;
+            border-left: 10px solid #f0f8ff;
+            border-right: 10px solid #f0f8ff;
+            border-radius: 20px 20px 0 0;
+            padding: 15px;
+            box-shadow: inset 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .inner-mechanism {
+            width: 100%;
+            height: 100%;
+            background: #2c3e50;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .turn-mechanism {
+            width: clamp(80px, 22vw, 100px);
+            height: clamp(80px, 22vw, 100px);
+            background: linear-gradient(145deg, #5dadeb, #4a98c9);
+            border: 5px solid white;
+            border-radius: 50%;
+            position: absolute;
+            left: 30%;
+            top: 52%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3), inset 0 4px 8px rgba(255,255,255,0.4);
+            transition: transform 0.2s ease;
+            z-index: 20;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            font-size: clamp(16px, 4vw, 20px);
+            text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+        }
+        
+        .turn-mechanism:active {
+            transform: translate(-50%, -50%) scale(0.95);
+        }
+        
+        .turn-mechanism.spinning {
+            animation: spin-handle 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        @keyframes spin-handle {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(720deg); }
+        }
+        
+        .logo-text {
+            position: absolute;
+            top: 52%;
+            left: 70%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            line-height: 1.2;
+            z-index: 15;
+            pointer-events: none;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .logo-text .line1 {
+            font-size: clamp(20px, 5.5vw, 24px);
+        }
+        .logo-text .line2 {
+            font-size: clamp(16px, 4vw, 20px);
+        }
+        
+        .dispenser-chute {
+            width: clamp(75px, 20vw, 85px);
+            height: clamp(65px, 18vw, 75px);
+            background: #2c3e50;
+            border-radius: 15px;
+            position: absolute;
+            top: 68%;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: inset 0 8px 15px rgba(0,0,0,0.6);
+            z-index: 10;
+        }
+        
+        .bottom-panel {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 18%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+        
+        .control-panel {
+            background: #bdc3c7;
+            padding: 5px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .control-panel .button-set {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3px;
+        }
+        .control-panel .small-button {
+            width: 15px; height: 15px;
+            border-radius: 50%;
+            border: 1px solid rgba(0,0,0,0.2);
+        }
+        .main-control-button {
+            width: 35px; height: 25px;
+            background: #5dadec;
+            border-radius: 8px;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        /* --- 修改: 圖示樣式 --- */
+        .decorations {
+            font-size: clamp(22px, 6vw, 26px); /* 稍微調整大小 */
+            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.15));
+            display: flex;
+            gap: 5px; /* 增加圖示間距 */
+        }
+
+        .floating-capsules {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            padding: 10px;
+        }
+
+        .floating-capsule {
+            position: absolute;
+            width: clamp(40px, 9vw, 50px);
+            height: clamp(40px, 9vw, 50px);
+            border-radius: 50%;
+            animation: float 3s ease-in-out infinite;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(to top, #ff6b6b 50%, #f8c291 50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .capsule-inner-number {
+            font-size: 18px;
+            font-weight: bold;
+            color: rgba(0, 0, 0, 0.6);
+            text-shadow: 0 1px 1px rgba(255,255,255,0.5);
+            pointer-events: none;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .floating-capsule:nth-child(1) { background: linear-gradient(to top, #ff6b6b 50%, #f0932b 50%); top: 10%; left: 10%; animation-delay: 0s;}
+        .floating-capsule:nth-child(2) { background: linear-gradient(to top, #4ecdc4 50%, #00d2d3 50%); top: 15%; left: 35%; animation-delay: 0.5s;}
+        .floating-capsule:nth-child(3) { background: linear-gradient(to top, #a29bfe 50%, #8c7ae6 50%); top: 8%; left: 60%; animation-delay: 1s;}
+        .floating-capsule:nth-child(4) { background: linear-gradient(to top, #f9ca24 50%, #f6e58d 50%); top: 30%; left: 80%; animation-delay: 1.5s;}
+        .floating-capsule:nth-child(5) { background: linear-gradient(to top, #ff7675 50%, #fd79a8 50%); top: 30%; left: 20%; animation-delay: 2s;}
+        .floating-capsule:nth-child(6) { background: linear-gradient(to top, #55efc4 50%, #079992 50%); top: 55%; left: 50%; animation-delay: 2.5s;}
+        .floating-capsule:nth-child(7) { background: linear-gradient(to top, #48dbfb 50%, #0abde3 50%); top: 52%; left: 75%; animation-delay: 0.2s;}
+        .floating-capsule:nth-child(8) { background: linear-gradient(to top, #ff9ff3 50%, #e84393 50%); top: 60%; left: 15%; animation-delay: 0.8s;}
+        .floating-capsule:nth-child(9) { background: linear-gradient(to top, #ced6e0 50%, #8395a7 50%); top: 75%; left: 35%; animation-delay: 1.2s;}
+        
+        .capsule-drop {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            position: absolute;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            animation: drop-capsule 0.8s ease-in forwards;
+            z-index: 15;
+        }
+
+        @keyframes drop-capsule {
+            0% { top: 40%; left: 50%; opacity: 1; transform: translateX(-50%) scale(1.1); }
+            100% { top: 70%; left: 50%; opacity: 0; transform: translateX(-50%) scale(0.9); }
+        }
+        
+        .result-capsule {
+            width: clamp(100px, 22vw, 130px);
+            height: clamp(100px, 22vw, 130px);
+            border-radius: 50%;
+            position: relative;
+            margin: -50px auto 10px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .result-capsule.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .result-capsule.opening {
+            animation: capsule-open 0.8s ease-in-out;
+        }
+
+        @keyframes capsule-open {
+            50% { transform: scale(1.2) rotate(10deg); }
+        }
+
+        .capsule-number {
+            font-size: clamp(48px, 12vw, 70px);
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            z-index: 2;
+        }
+        
+        .result-capsule .capsule-overlay {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 50%;
+            top: 0;
+            left: 0;
+            background: rgba(255,255,255,0.4);
+            border-radius: 130px 130px 0 0;
+            z-index: 1;
+        }
+        
+        .light-burst {
+            position: absolute;
+            width: 200%; height: 200%;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .light-burst.active {
+            opacity: 1;
+            animation: rotate-light 2s linear infinite;
+        }
+
+        @keyframes rotate-light {
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .light-ray {
+            position: absolute;
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent, gold, transparent);
+            top: 0;
+            left: 50%;
+            transform-origin: center;
+        }
+
+        .light-ray:nth-child(1) { transform: rotate(0deg); }
+        .light-ray:nth-child(2) { transform: rotate(45deg); }
+        .light-ray:nth-child(3) { transform: rotate(90deg); }
+        .light-ray:nth-child(4) { transform: rotate(135deg); }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            padding: 20px;
+        }
+
+        .modal.show {
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+            border-radius: 25px;
+            padding: clamp(25px, 6vw, 40px);
+            max-width: min(90vw, 500px);
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            transform: scale(0.8);
+            transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            position: relative;
+        }
+
+        .modal.show .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .modal-logo {
+            width: 90px;
+            height: 90px;
+            margin: -70px auto 10px;
+            display: block;
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5));
+            animation: logoFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes logoFloat {
+            50% { transform: translateY(-8px); }
+        }
+
+        .modal-header h3 {
+            font-size: clamp(22px, 5vw, 32px);
+            color: var(--modal-color, #f39c12);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-message {
+            font-size: clamp(16px, 3.8vw, 20px);
+            line-height: 1.8;
+            color: #333;
+            text-align: center;
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 15px;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .modal-button {
+            background: var(--modal-color, #f39c12);
+            color: white;
+            border: none;
+            padding: clamp(14px, 3.5vw, 18px) clamp(35px, 8vw, 50px);
+            font-size: clamp(16px, 4vw, 20px);
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            width: 100%;
+            max-width: 300px;
+            display: block;
+            margin: 0 auto;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .modal-button:hover { transform: translateY(-2px); }
+        .modal-button:active { transform: translateY(0); }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+
+    <div class="gashapon-container">
+        <h1 class="title">✨ 歡修行扭蛋機 ✨</h1>
+        <p class="instruction">今天請依據此名言來努力,邁出大乘利他的步伐!</p>
+        
+        <div class="gashapon-machine" id="gashaponMachine">
+            <div class="machine-body" id="machineBody">
+                <div class="capsule-area">
+                    <div class="inner-mechanism">
+                        <div class="floating-capsules">
+                            <div class="floating-capsule"></div><div class="floating-capsule"></div><div class="floating-capsule"></div>
+                            <div class="floating-capsule"></div><div class="floating-capsule"></div><div class="floating-capsule"></div>
+                            <div class="floating-capsule"></div><div class="floating-capsule"></div><div class="floating-capsule"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="turn-mechanism" id="turnMechanism">請按我</div>
+                
+                <div class="logo-text">
+                    <span class="line1">歡修行</span><br>
+                    <span class="line2">扭蛋機</span>
+                </div>
+                
+                <div class="dispenser-chute"></div>
+
+                <div class="bottom-panel">
+                    <div class="control-panel">
+                        <div class="button-set">
+                            <div class="small-button" style="background:#e74c3c;"></div>
+                            <div class="small-button" style="background:#f1c40f;"></div>
+                            <div class="small-button" style="background:#2ecc71;"></div>
+                            <div class="small-button" style="background:#9b59b6;"></div>
+                        </div>
+                        <div class="main-control-button"></div>
+                    </div>
+                    <!-- --- 修改: HTML 圖示 --- -->
+                    <div class="decorations">
+                        <span>🌸</span><span>☀️</span><span>📿</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="result-capsule" id="resultCapsule">
+            <div class="light-burst" id="lightBurst">
+                <div class="light-ray"></div><div class="light-ray"></div><div class="light-ray"></div><div class="light-ray"></div>
+            </div>
+            <div class="capsule-overlay"></div>
+            <span class="capsule-number" id="resultNumber"></span>
+        </div>
+    </div>
+
+    <div class="modal" id="mahayanaModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <img src="slogo.png" alt="Logo" class="modal-logo">
+                <h3>📿 大乘之道</h3>
+            </div>
+            <div class="modal-message" id="mahayanaMessage">正在載入智慧...</div>
+            <button class="modal-button" id="closeMahayanaBtn">南無真如</button>
+        </div>
+    </div>
+
+    <script>
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSmsbivmJSOlSU040kBg0FLr7MglWgV8GFGBpRBuCRah36LH__sp8fgfzHiASonM5d74ysM7qIY9EbL/pub?gid=0&single=true&output=csv';
+        
+        let mahayanaData = [];
+        let isSpinning = false;
+        let gashaponPool = [];
+
+        function refillGashaponPool() {
+            gashaponPool = [1, 2, 3, 4, 5, 6];
+        }
+        
+        async function loadSheetData() {
+            try {
+                const response = await fetch(CSV_URL);
+                if (!response.ok) throw new Error(`網路回應錯誤: ${response.status}`);
+                const csvText = await response.text();
+                const messages = csvText.split('\n').slice(1).map(line => line.trim().replace(/^"|"$/g, '')).filter(line => line);
+                if (messages.length === 0) throw new Error('CSV 檔案為空');
+                mahayanaData = messages;
+            } catch (error) {
+                console.error('❌ 資料載入失敗:', error);
+                mahayanaData = ["資料載入失敗！<br><small style='color: #e74c3c;'>請檢查網路連線，或確認 Google Sheet 已正確「發佈到網路」。</small>", "願一切眾生離苦得樂"];
+            }
+        }
+
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            if (!starsContainer) return;
+            let starsHtml = '';
+            for (let i = 0; i < 50; i++) {
+                const size = Math.random() * 4 + 2;
+                starsHtml += `<div class="star" style="left: ${Math.random() * 100}%; width: ${size}px; height: ${size}px; animation-duration: ${Math.random() * 5 + 5}s; animation-delay: ${Math.random() * 5}s;"></div>`;
+            }
+            starsContainer.innerHTML = starsHtml;
+        }
+
+        function populateCapsuleNumbers() {
+            const capsules = document.querySelectorAll('.floating-capsule');
+            capsules.forEach(capsule => {
+                const numberSpan = document.createElement('span');
+                numberSpan.className = 'capsule-inner-number';
+                numberSpan.textContent = Math.floor(Math.random() * 6) + 1;
+                capsule.appendChild(numberSpan);
+            });
+        }
+
+        function spinGashapon() {
+            if (isSpinning) return;
+            isSpinning = true;
+            
+            const turnMechanism = document.getElementById('turnMechanism');
+            const machineBody = document.getElementById('machineBody');
+            const resultCapsule = document.getElementById('resultCapsule');
+            
+            resultCapsule.classList.remove('show', 'opening');
+            turnMechanism.classList.add('spinning');
+            machineBody.classList.add('shaking');
+            
+            setTimeout(() => {
+                if (gashaponPool.length === 0) refillGashaponPool();
+                const randomIndex = Math.floor(Math.random() * gashaponPool.length);
+                const randomNumber = gashaponPool.splice(randomIndex, 1)[0];
+                
+                let capsuleColor, bookTitle;
+                
+                switch(randomNumber) {
+                    case 1: bookTitle = '紫藤花第一集'; capsuleColor = '#8e44ad'; break;
+                    case 2: bookTitle = '紫藤花第二集'; capsuleColor = '#af7ac5'; break;
+                    case 3: bookTitle = '紫藤花第三集'; capsuleColor = '#fc5c95'; break;
+                    case 4: bookTitle = '這時候‧深呼吸'; capsuleColor = '#3498db'; break;
+                    case 5: bookTitle = '真如人生'; capsuleColor = '#f39c12'; break;
+                    case 6: bookTitle = '真乘物語'; capsuleColor = '#2ecc71'; break;
+                }
+                
+                const dropCapsule = document.createElement('div');
+                dropCapsule.className = 'capsule-drop';
+                dropCapsule.style.background = capsuleColor;
+                machineBody.appendChild(dropCapsule);
+                
+                setTimeout(() => {
+                    dropCapsule.remove();
+                    
+                    const resultNumber = document.getElementById('resultNumber');
+                    const lightBurst = document.getElementById('lightBurst');
+                    
+                    resultCapsule.style.background = capsuleColor;
+                    resultNumber.textContent = randomNumber;
+                    resultCapsule.classList.add('show');
+                    lightBurst.classList.add('active');
+                    
+                    setTimeout(() => {
+                        resultCapsule.classList.add('opening');
+                        setTimeout(() => {
+                            showModal(bookTitle, capsuleColor);
+                            isSpinning = false;
+                        }, 800);
+                    }, 1000);
+                    
+                    setTimeout(() => lightBurst.classList.remove('active'), 2000);
+                    
+                }, 800);
+            }, 800);
+            
+            setTimeout(() => {
+                turnMechanism.classList.remove('spinning');
+                machineBody.classList.remove('shaking');
+            }, 1200);
+        }
+
+        function showModal(title, color) {
+            const modal = document.getElementById('mahayanaModal');
+            modal.querySelector('.modal-header h3').textContent = `📿 ${title}`;
+            const messageEl = document.getElementById('mahayanaMessage');
+            if (mahayanaData.length > 0) {
+                const filteredMessages = mahayanaData.filter(m => m.startsWith(`(${title})`));
+                if (filteredMessages.length > 0) {
+                    messageEl.innerHTML = filteredMessages[Math.floor(Math.random() * filteredMessages.length)];
+                } else {
+                    messageEl.innerHTML = `抱歉，目前資料庫中沒有找到關於「${title}」的語錄。`;
+                }
+            } else {
+                 messageEl.innerHTML = "發生未知錯誤，請重新整理頁面。";
+            }
+            modal.style.setProperty('--modal-color', color);
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('show'), 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('mahayanaModal');
+            const resultCapsule = document.getElementById('resultCapsule');
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+                resultCapsule.classList.remove('show', 'opening');
+            }, 300);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            createStars();
+            loadSheetData();
+            refillGashaponPool();
+            populateCapsuleNumbers();
+            
+            document.getElementById('turnMechanism').addEventListener('click', spinGashapon);
+            document.getElementById('closeMahayanaBtn').addEventListener('click', closeModal);
+            const modal = document.getElementById('mahayanaModal');
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal();
+            });
+        });
+    </script>
+</body>
+</html>

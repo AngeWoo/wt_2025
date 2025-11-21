@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>歡修行扭蛋機</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+        .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+        @keyframes twinkle { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
+        .gashapon-container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 30px;
+            padding: 40px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+        }
+        .title {
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        .instruction { color: rgba(255, 255, 255, 0.8); font-size: 16px; margin-bottom: 30px; }
+        .gashapon-machine { position: relative; width: 300px; height: 520px; margin: 0 auto 20px; }
+        .machine-body { width: 100%; height: 100%; position: relative; }
+        .machine-base {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 280px;
+            height: 200px;
+            background: linear-gradient(180deg, #e74c3c 0%, #c0392b 100%);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.3);
+        }
+        .glass-dome {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 240px;
+            height: 240px;
+            border-radius: 50% 50% 0 0;
+            background: radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.4), transparent 40%),
+                        linear-gradient(180deg, rgba(200, 230, 255, 0.3) 0%, rgba(150, 200, 250, 0.2) 100%);
+            border: 4px solid rgba(255, 255, 255, 0.4);
+            border-bottom: none;
+            overflow: hidden;
+            box-shadow: inset 0 10px 30px rgba(255, 255, 255, 0.2), 0 5px 20px rgba(100, 200, 255, 0.3);
+        }
+        .capsules-container { width: 100%; height: 100%; position: relative; padding: 20px; }
+        .mini-capsule {
+            position: absolute;
+            width: 28px;
+            height: 35px;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            animation: mini-float 4s ease-in-out infinite;
+            box-shadow: inset 0 -3px 5px rgba(0, 0, 0, 0.2), 0 3px 8px rgba(0, 0, 0, 0.3);
+        }
+        @keyframes mini-float {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            25% { transform: translateY(-8px) translateX(3px); }
+            50% { transform: translateY(-5px) translateX(-3px); }
+            75% { transform: translateY(-10px) translateX(2px); }
+        }
+        .mini-capsule:nth-child(1) { background: linear-gradient(145deg, #e74c3c, #c0392b); top: 30%; left: 20%; }
+        .mini-capsule:nth-child(2) { background: linear-gradient(145deg, #3498db, #2980b9); top: 45%; left: 60%; animation-delay: 0.5s; }
+        .mini-capsule:nth-child(3) { background: linear-gradient(145deg, #f39c12, #d68910); top: 60%; left: 25%; animation-delay: 1s; }
+        .mini-capsule:nth-child(4) { background: linear-gradient(145deg, #2ecc71, #27ae60); top: 35%; left: 70%; animation-delay: 1.5s; }
+        .mini-capsule:nth-child(5) { background: linear-gradient(145deg, #9b59b6, #8e44ad); top: 70%; left: 50%; animation-delay: 2s; }
+        .mini-capsule:nth-child(6) { background: linear-gradient(145deg, #e67e22, #d35400); top: 50%; left: 35%; animation-delay: 2.5s; }
+        .connection-ring {
+            position: absolute;
+            top: 235px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 250px;
+            height: 40px;
+            background: linear-gradient(180deg, #c0392b 0%, #a93226 50%, #922b21 100%);
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+        }
+        .handle-assembly {
+            position: absolute;
+            right: -45px;
+            top: 280px;
+            width: 140px;
+            height: 140px;
+            cursor: pointer;
+        }
+        .handle-base {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 70px;
+            background: linear-gradient(90deg, #7f8c8d 0%, #95a5a6 100%);
+            border-radius: 10px 0 0 10px;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        .twist-handle {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 90px;
+            height: 90px;
+            background: radial-gradient(circle at 35% 35%, #ffd700, #ffed4e 50%, #f1c40f 100%);
+            border-radius: 50%;
+            border: 5px solid #d4af37;
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4), inset 0 3px 8px rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease;
+        }
+        .handle-center {
+            width: 35px;
+            height: 35px;
+            background: radial-gradient(circle, #95a5a6, #7f8c8d);
+            border-radius: 50%;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.4);
+        }
+        .handle-assembly:hover .twist-handle { transform: translateY(-50%) scale(1.05); }
+        .handle-assembly.twisting .twist-handle { animation: twist-turn 2s cubic-bezier(0.4, 0.0, 0.2, 1); }
+        @keyframes twist-turn {
+            0% { transform: translateY(-50%) rotate(0deg); }
+            15% { transform: translateY(-50%) rotate(-20deg); }
+            30% { transform: translateY(-50%) rotate(340deg); }
+            45% { transform: translateY(-50%) rotate(-10deg); }
+            60% { transform: translateY(-50%) rotate(350deg); }
+            75% { transform: translateY(-50%) rotate(360deg); }
+            100% { transform: translateY(-50%) rotate(360deg); }
+        }
+        .machine-body.shaking .machine-base { animation: shake-base 2s ease-in-out; }
+        .machine-body.shaking .glass-dome { animation: shake-dome 2s ease-in-out; }
+        @keyframes shake-base {
+            0%, 100% { transform: translateX(-50%); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-50%) translateX(-3px); }
+            20%, 40%, 60%, 80% { transform: translateX(-50%) translateX(3px); }
+        }
+        @keyframes shake-dome {
+            0%, 100% { transform: translateX(-50%); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-50%) translateX(-2px); }
+            20%, 40%, 60%, 80% { transform: translateX(-50%) translateX(2px); }
+        }
+        .capsule-drop {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 55px;
+            height: 68px;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            opacity: 0;
+            z-index: 5;
+            animation: real-drop 1.5s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+            box-shadow: inset 0 -5px 10px rgba(0, 0, 0, 0.3), 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+        @keyframes real-drop {
+            0% { transform: translateX(-50%) translateY(-250px) rotate(0deg); opacity: 0; }
+            20% { opacity: 1; }
+            60% { transform: translateX(-50%) translateY(15px) rotate(180deg); }
+            75% { transform: translateX(-50%) translateY(-8px) rotate(270deg); }
+            85% { transform: translateX(-50%) translateY(3px) rotate(340deg); }
+            100% { transform: translateX(-50%) translateY(0) rotate(360deg); opacity: 1; }
+        }
+        .exit-tray {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 70px;
+            background: linear-gradient(180deg, #34495e 0%, #2c3e50 100%);
+            border-radius: 15px 15px 25px 25px;
+            box-shadow: inset 0 8px 15px rgba(0, 0, 0, 0.5);
+            border: 3px solid #1a252f;
+        }
+        .exit-opening {
+            position: absolute;
+            top: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90px;
+            height: 15px;
+            background: #000;
+            border-radius: 10px 10px 0 0;
+            box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.8);
+        }
+        .result-area { margin-top: 20px; min-height: 150px; position: relative; }
+        .result-capsule {
+            width: 120px;
+            height: 150px;
+            margin: 0 auto;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            position: relative;
+            transform: scale(0);
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 -5px 10px rgba(0, 0, 0, 0.3);
+        }
+        .result-capsule.show { transform: scale(1); animation: victory-spin 1s ease-out; }
+        @keyframes victory-spin {
+            0% { transform: scale(0) rotate(0deg); }
+            50% { transform: scale(1.2) rotate(180deg); }
+            100% { transform: scale(1) rotate(360deg); }
+        }
+        .result-capsule.opening { animation: capsule-open 1s ease-out forwards; }
+        @keyframes capsule-open {
+            0% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(10deg); }
+            100% { transform: scale(1.2) rotate(0deg); }
+        }
+        .result-number {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 0 20px currentColor;
+            opacity: 0;
+            animation: number-reveal 0.5s ease-out 0.5s forwards;
+        }
+        @keyframes number-reveal {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0); }
+            50% { transform: translate(-50%, -50%) scale(1.3); }
+            100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+        .reset-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+        .reset-btn.show { opacity: 1; transform: translateY(0); }
+        .reset-btn:hover { transform: translateY(-2px); }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal.show { display: flex; }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: modal-pop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        @keyframes modal-pop {
+            0% { transform: scale(0); }
+            100% { transform: scale(1); }
+        }
+        .modal-header {
+            margin: -30px -30px 20px -30px;
+            padding: 20px 30px;
+            border-radius: 17px 17px 0 0;
+            background: linear-gradient(135deg, #d35400, #e67e22);
+        }
+        .modal-header h3 { margin: 0; font-size: 1.5em; color: white; }
+        .modal-body { line-height: 1.6; font-size: 1.1em; }
+        .modal-message {
+            font-style: italic;
+            color: #2c3e50;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            background: #f8f9fa;
+            border-left: 4px solid #d35400;
+        }
+        .btn {
+            background: linear-gradient(135deg, #d35400, #e67e22);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1em;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .btn:hover { transform: translateY(-2px); }
+        @media (max-width: 540px) {
+            .gashapon-machine { transform: scale(0.7); margin-top: -60px; margin-bottom: -80px; }
+            .title { font-size: 24px; }
+            .instruction { font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    <div class="gashapon-container">
+        <h1 class="title">✨ 歡修行扭蛋機 ✨</h1>
+        <p class="instruction">點擊黃金轉盤，開啟您的幸運之旅！</p>
+        <div class="gashapon-machine">
+            <div class="machine-body" id="machineBody">
+                <div class="glass-dome">
+                    <div class="capsules-container">
+                        <div class="mini-capsule"></div>
+                        <div class="mini-capsule"></div>
+                        <div class="mini-capsule"></div>
+                        <div class="mini-capsule"></div>
+                        <div class="mini-capsule"></div>
+                        <div class="mini-capsule"></div>
+                    </div>
+                </div>
+                <div class="connection-ring"></div>
+                <div class="machine-base">
+                    <div class="exit-tray">
+                        <div class="exit-opening"></div>
+                    </div>
+                </div>
+                <div class="handle-assembly" id="handleAssembly">
+                    <div class="handle-base"></div>
+                    <div class="twist-handle">
+                        <div class="handle-center"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="result-area">
+            <div class="result-capsule" id="resultCapsule">
+                <div class="result-number" id="resultNumber"></div>
+            </div>
+            <button class="reset-btn" id="resetBtn">再轉一次</button>
+        </div>
+    </div>
+    <div id="mahayanaModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🙏 大乘之道</h3>
+            </div>
+            <div class="modal-body">
+                <div class="modal-message" id="mahayanaMessage">正在獲取修行指引...</div>
+            </div>
+            <button class="btn" id="closeMahayanaBtn">遵循教誨</button>
+        </div>
+    </div>
+    <script>
+        const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSmsbivmJSOlSU040kBg0FLr7MglWgV8GFGBpRBuCRah36LH__sp8fgfzHiASonM5d74ysM7qIY9EbL/pub?gid=0&single=true&output=csv';
+        let data = [];
+        let isSpinning = false;
+
+        function createStars() {
+            const stars = document.getElementById('stars');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                stars.appendChild(star);
+            }
+        }
+
+        async function loadData() {
+            try {
+                const res = await fetch(url);
+                const text = await res.text();
+                const lines = text.split('\n');
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim().replace(/^"|"$/g, '').replace(/\r/g, '');
+                    if (line) data.push(line);
+                }
+                if (data.length === 0) data.push("您的功德金不足,今天請做大乘利他奉獻修行");
+            } catch (e) {
+                data.push("您的功德金不足,今天請做大乘利他奉獻修行");
+            }
+        }
+
+        function spin() {
+            if (isSpinning) return;
+            isSpinning = true;
+            
+            const handle = document.getElementById('handleAssembly');
+            const body = document.getElementById('machineBody');
+            const capsule = document.getElementById('resultCapsule');
+            const number = document.getElementById('resultNumber');
+            const btn = document.getElementById('resetBtn');
+            
+            capsule.classList.remove('show', 'opening');
+            btn.classList.remove('show');
+            handle.classList.add('twisting');
+            body.classList.add('shaking');
+            
+            setTimeout(() => {
+                const drop = document.createElement('div');
+                drop.className = 'capsule-drop';
+                drop.style.background = 'linear-gradient(145deg, #d35400, #e67e22)';
+                body.appendChild(drop);
+                
+                const num = Math.floor(Math.random() * 10) + 1;
+                
+                setTimeout(() => {
+                    drop.remove();
+                    capsule.style.background = 'linear-gradient(145deg, #d35400, #e67e22)';
+                    number.textContent = num;
+                    capsule.classList.add('show');
+                    
+                    setTimeout(() => {
+                        capsule.classList.add('opening');
+                        setTimeout(() => {
+                            btn.classList.add('show');
+                            showModal();
+                        }, 500);
+                    }, 500);
+                }, 1500);
+            }, 1500);
+            
+            setTimeout(() => {
+                handle.classList.remove('twisting');
+                body.classList.remove('shaking');
+                isSpinning = false;
+            }, 2000);
+        }
+
+        function reset() {
+            const capsule = document.getElementById('resultCapsule');
+            const number = document.getElementById('resultNumber');
+            const btn = document.getElementById('resetBtn');
+            capsule.classList.remove('show', 'opening');
+            btn.classList.remove('show');
+            setTimeout(() => {
+                number.textContent = '';
+                capsule.style.background = '';
+            }, 300);
+        }
+
+        function showModal() {
+            const modal = document.getElementById('mahayanaModal');
+            const msg = document.getElementById('mahayanaMessage');
+            if (data.length > 0) {
+                msg.innerHTML = data[Math.floor(Math.random() * data.length)];
+            }
+            modal.classList.add('show');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('mahayanaModal');
+            modal.classList.remove('show');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            createStars();
+            loadData();
+            document.getElementById('handleAssembly').addEventListener('click', spin);
+            document.getElementById('resetBtn').addEventListener('click', reset);
+            document.getElementById('closeMahayanaBtn').addEventListener('click', closeModal);
+            document.getElementById('mahayanaModal').addEventListener('click', (e) => {
+                if (e.target.id === 'mahayanaModal') closeModal();
+            });
+        });
+    </script>
+</body>
+</html>
