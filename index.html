@@ -776,27 +776,64 @@
     </div>
 
     <script>
-        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSmsbivmJSOlSU040kBg0FLr7MglWgV8GFGBpRBuCRah36LH__sp8fgfzHiASonM5d74ysM7qIY9EbL/pub?gid=0&single=true&output=csv';
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRlArx460gMLKbiCQT1yroqX1tEkLFGRjBn7CB8f4eXtuek_5HKQ0FEQhZ1cAUfeDZl1m_SagzPGrHE/pub?gid=0&single=true&output=csv';
         
         let mahayanaData = [];
         let isSpinning = false;
         let gashaponPool = [];
-
-        function refillGashaponPool() {
-            gashaponPool = [1, 2, 3, 4, 5, 6];
-        }
         
         async function loadSheetData() {
             try {
                 const response = await fetch(CSV_URL);
                 if (!response.ok) throw new Error(`網路回應錯誤: ${response.status}`);
                 const csvText = await response.text();
-                const messages = csvText.split('\n').slice(1).map(line => line.trim().replace(/^"|"$/g, '')).filter(line => line);
-                if (messages.length === 0) throw new Error('CSV 檔案為空');
-                mahayanaData = messages;
+                // 從第二行開始解析 (跳過標頭)
+                const lines = csvText.split('\n').slice(1).filter(line => line.trim() !== '');
+                if (lines.length === 0) throw new Error('CSV 檔案為空或格式不符');
+
+                mahayanaData = lines.map(line => {
+                    return line.trim(); // 直接回傳原始行，並移除前後空白
+                });
             } catch (error) {
                 console.error('❌ 資料載入失敗:', error);
-                mahayanaData = ["資料載入失敗！<br><small style='color: #e74c3c;'>請檢查網路連線，或確認 Google Sheet 已正確「發佈到網路」。</small>", "願一切眾生離苦得樂"];
+                mahayanaData = [
+                    "(摘錄《這時候。深呼吸》)心痛悲傷時，失去信心時，請閉上眼睛想一想，自己是與佛陀同在的。",
+                    "(摘錄《這時候。深呼吸》)用一句話，或一個動作說聲「早安!」、「你好!」，交流是從打招呼開始的。",
+                    "(摘錄《這時候。深呼吸》)由於你的溫柔，讓我體會到佛陀的慈心， 謝謝！",
+                    "(摘錄《這時候。深呼吸》)很想拼命去做，這樣是很棒的 ，可是急著想把事情做完，這樣就容易累了。",
+                    "(摘錄《這時候。深呼吸》)或許不要太勉強自己 ，從能做的一點一點開始， 這樣也能夠完成。",
+                    "(摘錄《這時候。深呼吸》)佛陀在每個人的心裡面，我們都有一點想要溫暖待人。",
+                    "(摘錄《這時候。深呼吸》)想要去幫助人， 想要誠實，這樣小小的心意，就是一尊小小的佛陀。",
+                    "(摘錄《這時候。深呼吸》)外表漂亮是很好的，可是呢，說話和態度也能更加真誠，那就更美麗了。",
+                    "(摘錄《這時候。深呼吸》)開朗坦誠、和藹可親，每個人都擁有和別人不一樣的特質。",
+                    "(摘錄《這時候。深呼吸》)想要努力，想做得更好，這也是一種幸福。",
+                    "(摘錄《這時候。深呼吸》)讓人覺得「這個人真好!」， 這樣的優點你也一定有。",
+                    "(摘錄《這時候。深呼吸》)與某個人相處，這個人或許是佛陀讓我們得以遇見的貴人。",
+                    "(摘錄《這時候。深呼吸》)別認為你自己的能力不夠，佛陀需要你這樣的人，有人也需要你。",
+                    "(摘錄《這時候。深呼吸》)即使能為他分擔一點點也好，這樣的真誠，一定可以與對方的心相通。",
+                    "(摘錄《這時候。深呼吸》)有時會想喘口氣吧? 那時我就做個深呼吸，然後跟自己說:「 再繼續努力吧!」",
+                    "(摘錄《真如人生3》第34頁)做得好!善哉!善哉!",
+                    "(摘錄《真如人生》第96頁)先定出自己的方向，然後請教自己信賴和敬重的人。",
+                    "(摘錄《真如人生》第99 頁)誠實面對自己的感覺是很重要的。",
+                    "(摘錄《真如人生》第102頁)一定要重新再來，絕不放棄。",
+                    "(摘錄《真如人生》第118頁)如果能對身邊的事物秉持感謝，一定會發現，自己不是孤零零的一個人，而是隨時隨地都受到保佑。",
+                    "(摘錄《真如人生1》第50頁)如果動善念，行善行，就會有善果，命運就會走向光明。",
+                    "(摘錄《真如人生》第57頁)⼼存感謝，是通往幸福道路的真理。",
+                    "(摘錄《真如人生》第57頁)懂得感謝的⼈，內⼼是善美的。",
+                    "(摘錄《真如人生》第70頁)如果我們珍惜自然，自然也會珍惜我們。",
+                    "(摘錄《真如人生》第70頁)當我們尊重別人，別人也會尊重我們，進而共同孕育和諧。",
+                    "(摘錄《真如人生》第74頁)只要能為他人，不顧己利，那麼一定能發現生命的意義。",
+                    "(摘錄《真如人生2》第78頁)要實現夢想，正確認識、認清現在的自己是非常重要的。",
+                    "(摘錄《真如人生2》第80頁)用心聽取對方的意見跟指正，更能有所成長。",
+                    "(摘錄《真如人生》第86頁)讓我們感謝這些被視為理所(當然的事情。",
+                    "(摘錄《真如人生》第93頁)所有生命都是有意義的，每一個人的内心都擁有珍貴、無可取代的特質。",
+                    "(摘錄《真如人生》第100頁)抬起頭、深呼吸，一步一步走出去，積極面對人生。",
+                    "(摘錄《真如人生》第103頁)失敗時要勇敢的告訴自己:「我不會就此放棄!我的人生從這一刻開始!」。",
+                    "(摘錄《真如人生》第105頁)或許過去曾經失敗過，但是未來還是屬於自己的，不屈饒，以不放棄的精神創造自己的未來。",
+                    "(摘錄《真如人生2》第106頁)如果遇事能保持毅力堅持下去，就能培養出不屈撓的耐力。",
+                    "(摘錄《真如人生》第106頁)姑且把無法改變的事放置一旁，先去做自己做得到，可以改變的事。",
+                    "(摘錄《真如人生》第148頁)從自己與身邊的人心靈互相溝通開始，就能夠促成世界和平。"
+                ];
             }
         }
 
@@ -828,21 +865,41 @@
             machineContainer.classList.add('shaking');
             
             setTimeout(() => {
-                if (gashaponPool.length === 0) refillGashaponPool();
-                const randomIndex = Math.floor(Math.random() * gashaponPool.length);
-                const randomNumber = gashaponPool.splice(randomIndex, 1)[0];
+                // 新規則：直接從所有語錄中隨機抽取一則
+                if (mahayanaData.length === 0) {
+                    console.error("語錄資料尚未載入或為空！");
+                    // 可以選擇顯示一個錯誤訊息給使用者
+                    showModal("錯誤", '#e74c3c');
+                    isSpinning = false;
+                    return;
+                }
+
+                // 定義可用的扭蛋顏色列表
+                const availableColors = [
+                    '#8e44ad', // 紫藤花第一集 (紫色)
+                    '#af7ac5', // 紫藤花第二集 (淺紫)
+                    '#fc5c95', // 紫藤花第三集 (粉紅)
+                    '#3498db', // 這時候‧深呼吸 (藍色)
+                    '#f39c12', // 真如人生 (橘色)
+                    '#2ecc71', // 真乘物語 (綠色)
+                    '#e74c3c', // 紅色
+                    '#1abc9c'  // 青色
+                ];
+                const randomIndex = Math.floor(Math.random() * mahayanaData.length);
+                const randomQuote = mahayanaData[randomIndex];
                 
-                let capsuleColor, bookTitle;
-                
-                switch(randomNumber) {
-                    case 1: bookTitle = '紫藤花第一集'; capsuleColor = '#8e44ad'; break;
-                    case 2: bookTitle = '紫藤花第二集'; capsuleColor = '#af7ac5'; break;
-                    case 3: bookTitle = '紫藤花第三集'; capsuleColor = '#fc5c95'; break;
-                    case 4: bookTitle = '這時候‧深呼吸'; capsuleColor = '#3498db'; break;
-                    case 5: bookTitle = '真如人生'; capsuleColor = '#f39c12'; break;
-                    case 6: bookTitle = '真乘物語'; capsuleColor = '#2ecc71'; break;
+                // 從抽中的語錄解析書名和內容
+                // 匹配模式：(書名)內容，書名為括弧內文字，內容為括弧後所有文字
+                let bookTitle = "未知書本";
+                let quoteContent = randomQuote;
+                const match = randomQuote.match(/^\(([^)]+)\)(.*)/s);
+                if (match) {
+                    bookTitle = match[1];
+                    quoteContent = match[2].trim();
                 }
                 
+                // 從可用顏色列表中隨機選擇一個顏色
+                const capsuleColor = availableColors[Math.floor(Math.random() * availableColors.length)];
                 const dropCapsule = document.createElement('div');
                 dropCapsule.className = 'capsule-drop';
                 dropCapsule.style.background = `linear-gradient(to top, ${capsuleColor} 50%, rgba(255,255,255,0.4) 50%)`;
@@ -860,7 +917,7 @@
                     setTimeout(() => {
                         resultCapsule.classList.add('opening');
                         setTimeout(() => {
-                            showModal(bookTitle, capsuleColor);
+                            showModal(bookTitle, capsuleColor, quoteContent); // 分別傳遞書名和內容
                             isSpinning = false;
                         }, 800);
                     }, 1000);
@@ -876,21 +933,22 @@
             }, 1200);
         }
 
-        function showModal(title, color) {
+        function showModal(title, color, content) {
             const modal = document.getElementById('mahayanaModal');
-            modal.querySelector('.modal-header h3').textContent = `(摘錄自) ${title}`;
+            modal.querySelector('.modal-header h3').textContent = title;
             const messageEl = document.getElementById('mahayanaMessage');
-            if (mahayanaData.length > 0) {
-                const filteredMessages = mahayanaData.filter(m => m.startsWith(`(${title})`));
-                if (filteredMessages.length > 0) {
-                    const randomMessage = filteredMessages[Math.floor(Math.random() * filteredMessages.length)];
-                    const modifiedMessage = randomMessage.replace(`(${title})`, '');
-                    messageEl.innerHTML = modifiedMessage.trim();
-                } else {
-                    messageEl.innerHTML = `抱歉，目前資料庫中沒有找到關於「${title}」的語錄。`;
-                }
+
+            // 如果是錯誤訊息
+            if (title === "錯誤") {
+                messageEl.innerHTML = "語錄資料載入失敗，請檢查網路或稍後再試。";
+            } else if (content) {
+                // 新邏輯：直接顯示傳入的 content
+                messageEl.innerHTML = content;
+            } else if (mahayanaData.length > 0) {
+                messageEl.innerHTML = `抱歉，目前資料庫中沒有找到關於「${title}」的語錄。`;
             } else {
-                 messageEl.innerHTML = "發生未知錯誤，請重新整理頁面。";
+                // 處理資料還沒載入完畢的情況
+                messageEl.innerHTML = "發生未知錯誤，請重新整理頁面。";
             }
             modal.style.display = 'flex';
             setTimeout(() => modal.classList.add('show'), 10);
@@ -909,7 +967,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             createStars();
             loadSheetData();
-            refillGashaponPool();
             
             document.getElementById('turnMechanism').addEventListener('click', spinGashapon);
             document.getElementById('closeMahayanaBtn').addEventListener('click', closeModal);
