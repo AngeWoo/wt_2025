@@ -273,7 +273,6 @@
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
             overflow: visible; /* 允許馬的圖片稍微突出 */
             
-            cursor: pointer; /* 新增：讓滑鼠移上去時顯示為可點擊的手形圖示 */
             padding-right: 10px;
         }
 
@@ -974,10 +973,6 @@
             const modal = document.getElementById('mahayanaModal');
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) closeModal();
-            });
-            // 新增：為最下方的按鈕添加點擊重新載入功能
-            document.querySelector('.machine-base').addEventListener('click', function() {
-                location.reload();
             });
         });
     </script>
