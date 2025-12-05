@@ -193,12 +193,13 @@
             }
         }
 
+        /* 黃色機身位置與高度調整 */
         .machine-body {
             width: 100%;
-            height: 55%;
+            height: 48%; 
             background: linear-gradient(145deg, #f1c40f, #f39c12);
             position: absolute;
-            bottom: 10%;
+            bottom: 14%; /* 製造與按鈕之間的空隙 */
             left: 0;
             border-radius: 10px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.4);
@@ -214,9 +215,10 @@
             75% { transform: translate(4px, 0); }
         }
 
+        /* 透明蓋子高度配合機身調整 */
         .capsule-container {
             width: 90%;
-            height: 45%;
+            height: 42%;
             position: absolute;
             top: 0;
             left: 5%;
@@ -252,9 +254,10 @@
             border-radius: 4px;
         }
         
+        /* 按鈕固定在底部 */
         .machine-base {
             width: 100%;
-            height: 8%;
+            height: 10%;
             background: linear-gradient(180deg, #b2bec3, #8395a7 80%);
             position: absolute;
             bottom: 0;
@@ -265,24 +268,33 @@
             /* Flexbox 設定，確保內容置中 */
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: center; /* 讓整組內容水平置中 */
             
-            font-size: 18px;
+            /* 設定響應式字體與強制不換行 */
+            font-size: clamp(14px, 4.5vw, 18px); 
             font-weight: bold;
             color: rgba(255, 255, 255, 0.8);
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-            overflow: visible; /* 允許馬的圖片稍微突出 */
             
-            cursor: pointer; /* 新增：讓滑鼠移上去時顯示為可點擊的手形圖示 */
-            padding-right: 10px;
+            white-space: nowrap; /* 強制不換行 */
+            overflow: visible; 
+            
+            cursor: pointer; 
+            
+            /* 保持右側 padding 來平衡左側馬圖案的負邊距，達到視覺置中 */
+            padding-right: 45px; 
+            
+            text-decoration: none; 
+            -webkit-tap-highlight-color: transparent; 
+            z-index: 50; 
+            touch-action: manipulation;
         }
 
-        /* 修改處：針對馬的 Logo 調整 */
+        /* 馬圖案 */
         .base-logo {
             height: 185%; 
             width: auto;
-            /* 調整處：從 -45px 改為 -30px，讓馬跟字之間留出一格的空間 */
-            margin-right: -30px; 
+            margin-right: -45px; /* 負邊距讓馬緊貼文字 */
             margin-bottom: 4px;
             object-fit: contain;
             filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
@@ -290,26 +302,42 @@
             z-index: 2;
         }
 
-        /* 新增：確保文字位置微調 */
         .base-text {
             position: relative;
             z-index: 1;
-            margin-top: 2px; /* 讓文字視覺上與馬的腳底更協調 */
+            margin-top: 2px;
         }
         
+        /* 放大中央機關尺寸與修正位置 */
         .turn-mechanism {
-            width: 130px;
-            height: 150px;
+            width: 160px;
+            height: 190px;
             background: linear-gradient(145deg, #dfe6e9, #b2bec3);
             border: 2px solid #8395a7;
             border-radius: 8px;
             position: absolute;
-            top: 15%;
+            top: 15px; 
             left: 50%;
             transform: translateX(-50%);
             cursor: pointer;
             box-shadow: 0 5px 10px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.5);
             transition: transform 0.2s ease;
+        }
+
+        /* 手機版針對內部元件調整 */
+        @media (max-width: 768px) {
+            .turn-mechanism {
+                /* 手機版稍微縮小 90% 以防空間不足 */
+                transform: translateX(-50%) scale(0.9); 
+                transform-origin: top center;
+                top: 10px;
+            }
+            .turn-mechanism:active {
+                transform: translateX(-50%) scale(0.85);
+            }
+            .dispenser-chute {
+                bottom: 10px; 
+            }
         }
         
         .turn-mechanism::before {
@@ -320,8 +348,10 @@
             border-radius: 8px;
         }
         
-        .turn-mechanism:active {
-            transform: translateX(-50%) scale(0.95);
+        @media (min-width: 769px) {
+            .turn-mechanism:active {
+                transform: translateX(-50%) scale(0.95);
+            }
         }
         
         .coin-slot-area {
@@ -330,7 +360,7 @@
             border: 8px solid #b2bec3;
             border-radius: 50%;
             position: absolute;
-            top: 15px;
+            top: 20px;
             left: 50%;
             transform: translateX(-50%);
             background: #8395a7;
@@ -350,12 +380,12 @@
         }
 
         .handle {
-            width: 80px;
-            height: 25px;
+            width: 90px; 
+            height: 30px; 
             background: linear-gradient(180deg, #e55039, #c0392b);
             border-radius: 6px;
             position: absolute;
-            bottom: 20px;
+            bottom: 30px; 
             left: 50%;
             transform: translateX(-50%);
             transform-origin: 50% 50%;
@@ -368,7 +398,7 @@
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 14px;
+            font-size: 16px; 
             font-weight: bold;
             text-shadow: 0 1px 2px rgba(0,0,0,0.4);
         }
@@ -382,13 +412,14 @@
             to { transform: translateX(-50%) rotate(720deg); }
         }
 
+        /* 修改處：調薄出球口 */
         .dispenser-chute {
-            width: 100px;
-            height: 50px;
+            width: 130px;
+            height: 40px; /* 修改：調整為 40px，讓它變薄 */
             background: linear-gradient(145deg, #b2bec3, #8395a7);
             border-radius: 5px;
             position: absolute;
-            bottom: 15%;
+            bottom: 15px; 
             left: 50%;
             transform: translateX(-50%);
             box-shadow: inset 0 4px 10px rgba(0,0,0,0.5);
@@ -750,10 +781,10 @@
                 <div class="dispenser-chute"></div>
             </div>
             
-            <div class="machine-base">
+            <a href="javascript:void(0);" onclick="window.history.back(); return false;" class="machine-base">
                 <img src="hero-logo.gif" class="base-logo" alt="Hero">
                 <span class="base-text">立馬前行GoGoGo</span>
-            </div>
+            </a>
         </div>
 
         <div class="result-capsule" id="resultCapsule">
@@ -795,6 +826,10 @@
                 mahayanaData = lines.map(line => {
                     return line.trim(); // 直接回傳原始行，並移除前後空白
                 });
+                
+                // 初始化抽獎池
+                gashaponPool = [...mahayanaData];
+
             } catch (error) {
                 console.error('❌ 資料載入失敗:', error);
                 mahayanaData = [
@@ -813,7 +848,7 @@
                     "(摘錄《這時候。深呼吸》)別認為你自己的能力不夠，佛陀需要你這樣的人，有人也需要你。",
                     "(摘錄《這時候。深呼吸》)即使能為他分擔一點點也好，這樣的真誠，一定可以與對方的心相通。",
                     "(摘錄《這時候。深呼吸》)有時會想喘口氣吧? 那時我就做個深呼吸，然後跟自己說:「 再繼續努力吧!」",
-                    "(摘錄《真如人生3》)做得好!善哉!善哉!",
+                    "(摘錄《真如人生》)做得好!善哉!善哉!",
                     "(摘錄《真如人生》)先定出自己的方向，然後請教自己信賴和敬重的人。",
                     "(摘錄《真如人生》)誠實面對自己的感覺是很重要的。",
                     "(摘錄《真如人生》)一定要重新再來，絕不放棄。",
@@ -824,17 +859,19 @@
                     "(摘錄《真如人生》)如果我們珍惜自然，自然也會珍惜我們。",
                     "(摘錄《真如人生》)當我們尊重別人，別人也會尊重我們，進而共同孕育和諧。",
                     "(摘錄《真如人生》)只要能為他人，不顧己利，那麼一定能發現生命的意義。",
-                    "(摘錄《真如人生2》)要實現夢想，正確認識、認清現在的自己是非常重要的。",
-                    "(摘錄《真如人生2》)用心聽取對方的意見跟指正，更能有所成長。",
+                    "(摘錄《真如人生》)要實現夢想，正確認識、認清現在的自己是非常重要的。",
+                    "(摘錄《真如人生》)用心聽取對方的意見跟指正，更能有所成長。",
                     "(摘錄《真如人生》)讓我們感謝這些被視為理所(當然的事情。",
                     "(摘錄《真如人生》)所有生命都是有意義的，每一個人的内心都擁有珍貴、無可取代的特質。",
                     "(摘錄《真如人生》)抬起頭、深呼吸，一步一步走出去，積極面對人生。",
                     "(摘錄《真如人生》)失敗時要勇敢的告訴自己:「我不會就此放棄!我的人生從這一刻開始!」。",
                     "(摘錄《真如人生》)或許過去曾經失敗過，但是未來還是屬於自己的，不屈饒，以不放棄的精神創造自己的未來。",
-                    "(摘錄《真如人生2》)如果遇事能保持毅力堅持下去，就能培養出不屈撓的耐力。",
+                    "(摘錄《真如人生》)如果遇事能保持毅力堅持下去，就能培養出不屈撓的耐力。",
                     "(摘錄《真如人生》)姑且把無法改變的事放置一旁，先去做自己做得到，可以改變的事。",
                     "(摘錄《真如人生》)從自己與身邊的人心靈互相溝通開始，就能夠促成世界和平。"
                 ];
+                // 初始化抽獎池 (備用資料)
+                gashaponPool = [...mahayanaData];
             }
         }
 
@@ -866,31 +903,33 @@
             machineContainer.classList.add('shaking');
             
             setTimeout(() => {
-                // 新規則：直接從所有語錄中隨機抽取一則
+                // 資料檢查
                 if (mahayanaData.length === 0) {
                     console.error("語錄資料尚未載入或為空！");
-                    // 可以選擇顯示一個錯誤訊息給使用者
                     showModal("錯誤", '#e74c3c');
                     isSpinning = false;
                     return;
                 }
 
+                // 不重複抽籤邏輯
+                if (gashaponPool.length === 0) {
+                    gashaponPool = [...mahayanaData];
+                    console.log("抽獎池已重置");
+                }
+
+                const poolIndex = Math.floor(Math.random() * gashaponPool.length);
+                const randomQuote = gashaponPool[poolIndex];
+                
+                // 從池子中移除已抽到的項目
+                gashaponPool.splice(poolIndex, 1);
+
                 // 定義可用的扭蛋顏色列表
                 const availableColors = [
-                    '#8e44ad', // 紫藤花第一集 (紫色)
-                    '#af7ac5', // 紫藤花第二集 (淺紫)
-                    '#fc5c95', // 紫藤花第三集 (粉紅)
-                    '#3498db', // 這時候‧深呼吸 (藍色)
-                    '#f39c12', // 真如人生 (橘色)
-                    '#2ecc71', // 真乘物語 (綠色)
-                    '#e74c3c', // 紅色
-                    '#1abc9c'  // 青色
+                    '#8e44ad', '#af7ac5', '#fc5c95', '#3498db', 
+                    '#f39c12', '#2ecc71', '#e74c3c', '#1abc9c'
                 ];
-                const randomIndex = Math.floor(Math.random() * mahayanaData.length);
-                const randomQuote = mahayanaData[randomIndex];
                 
-                // 從抽中的語錄解析書名和內容
-                // 匹配模式：(書名)內容，書名為括弧內文字，內容為括弧後所有文字
+                // 解析書名和內容
                 let bookTitle = "未知書本";
                 let quoteContent = randomQuote;
                 const match = randomQuote.match(/^\(([^)]+)\)(.*)/s);
@@ -899,7 +938,6 @@
                     quoteContent = match[2].trim();
                 }
                 
-                // 從可用顏色列表中隨機選擇一個顏色
                 const capsuleColor = availableColors[Math.floor(Math.random() * availableColors.length)];
                 const dropCapsule = document.createElement('div');
                 dropCapsule.className = 'capsule-drop';
@@ -918,7 +956,7 @@
                     setTimeout(() => {
                         resultCapsule.classList.add('opening');
                         setTimeout(() => {
-                            showModal(bookTitle, capsuleColor, quoteContent); // 分別傳遞書名和內容
+                            showModal(bookTitle, capsuleColor, quoteContent);
                             isSpinning = false;
                         }, 800);
                     }, 1000);
@@ -939,16 +977,11 @@
             modal.querySelector('.modal-header h3').textContent = title;
             const messageEl = document.getElementById('mahayanaMessage');
 
-            // 如果是錯誤訊息
             if (title === "錯誤") {
                 messageEl.innerHTML = "語錄資料載入失敗，請檢查網路或稍後再試。";
             } else if (content) {
-                // 新邏輯：直接顯示傳入的 content
                 messageEl.innerHTML = content;
-            } else if (mahayanaData.length > 0) {
-                messageEl.innerHTML = `抱歉，目前資料庫中沒有找到關於「${title}」的語錄。`;
             } else {
-                // 處理資料還沒載入完畢的情況
                 messageEl.innerHTML = "發生未知錯誤，請重新整理頁面。";
             }
             modal.style.display = 'flex';
@@ -974,10 +1007,6 @@
             const modal = document.getElementById('mahayanaModal');
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) closeModal();
-            });
-            // 新增：為最下方的按鈕添加點擊重新載入功能
-            document.querySelector('.machine-base').addEventListener('click', function() {
-                location.reload();
             });
         });
     </script>
